@@ -72,6 +72,7 @@ class GameEngine:
         '''
         This method is called when a new game is instantiated.
         '''
+        
         self.clock = pg.time.Clock()
         self.state_machine.push(Const.STATE_MENU)
         self.players = [Player(0), Player(1)]
@@ -90,9 +91,19 @@ class GameEngine:
             elif cur_state == Const.STATE_PLAY:
                 self.update_objects()
 
+                self.swaptimer += 1
+                if self.swaptimer == Const.SWAPTIME:
+                    self.ev_manager.post(EventSwap())
+                    self.swaptimer = 0
+
                 self.timer -= 1
                 if self.timer == 0:
                     self.ev_manager.post(EventTimesUp())
+
+                vec = self.players[0].position - self.players[1].position 
+                if pg.math.Vector2.magnitude(vec) < 2*Const.PLAYER_RADIUS:
+                    self.ev_manager.post(EventCollision())
+
             elif cur_state == Const.STATE_ENDGAME:
                 self.update_endgame()
 
@@ -112,6 +123,17 @@ class GameEngine:
         elif isinstance(event, EventTimesUp):
             self.state_machine.push(Const.STATE_ENDGAME)
 
+        elif isinstance(event, EventSwap):
+            self.players[0].speed, self.players[1].speed = self.players[1].speed, self.players[0].speed
+            print(f"DB swap happend")
+
+        elif isinstance(event, EventCollision):
+            if self.players[0].speed > self.players[1].speed:
+                self.players[0].score += 1
+            else: 
+                self.players[1].score += 1
+            self.state_machine.push(Const.STATE_ENDGAME)
+
     def update_menu(self):
         '''
         Update the objects in welcome scene.
@@ -127,6 +149,7 @@ class GameEngine:
         pass
 
     def update_endgame(self):
+        print(f"Collision happend, score {self.players[0].score} :  {self.players[1].score}")
         '''
         Update the objects in endgame scene.
         For example: scoreboard
@@ -141,6 +164,7 @@ class GameEngine:
         self.running = True
         self.ev_manager.post(EventInitialize())
         self.timer = Const.GAME_LENGTH
+        self.swaptimer = 0
         while self.running:
             self.ev_manager.post(EventEveryTick())
             self.clock.tick(Const.FPS)
@@ -151,7 +175,7 @@ class Player:
         self.player_id = player_id
         self.position = Const.PLAYER_INIT_POSITION[player_id] # is a pg.Vector2
         self.speed = Const.SPEED_ATTACK if player_id == 1 else Const.SPEED_DEFENSE
-
+        self.score = 0
     def move_direction(self, direction: str):
         '''
         Move the player along the direction by its speed.

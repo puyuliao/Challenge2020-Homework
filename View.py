@@ -75,6 +75,13 @@ class GraphicalView:
             center = list(map(int, player.position))
             pg.draw.circle(self.screen, Const.PLAYER_COLOR[player.player_id], center, Const.PLAYER_RADIUS)
 
+        #draw states
+        font = pg.font.Font(None, 20)
+        atk_str = "Green" if self.model.players[0].speed > self.model.players[1].speed else "Purple"
+        text_surface = font.render(f"attacker: {atk_str}; Time: {(Const.SWAPTIME-self.model.swaptimer)//Const.FPS}; TimeLeft: {self.model.timer//Const.FPS};", 1, pg.Color('gray88'))
+        text_center = (0, 0)
+        self.screen.blit(text_surface, text_surface.get_rect(topleft=text_center))
+
         pg.display.flip()
 
     def render_stop(self):
@@ -83,5 +90,12 @@ class GraphicalView:
     def render_endgame(self):
         # draw background
         self.screen.fill(Const.BACKGROUND_COLOR)
-
+        font = pg.font.Font(None, 36)
+        if self.model.players[0].score != self.model.players[1].score:
+            winstr = "Green" if self.model.players[0].score > self.model.players[1].score else "Purple"
+            text_surface = font.render(f"GameOver {winstr} wins", 1, pg.Color('gray88'))
+        else:
+            text_surface = font.render("GameOwer Draw", 1, pg.Color('gray88'))
+        text_center = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 2)
+        self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
         pg.display.flip()

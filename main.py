@@ -5,7 +5,7 @@ from Model import GameEngine
 from Controller import Controller
 from View import GraphicalView
 
-
+            
 def main():
     pg.init()
     ev_manager = EventManager()

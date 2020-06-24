@@ -3,6 +3,7 @@ import pygame as pg
 # model
 FPS = 60 # frame per second
 GAME_LENGTH = 30 * FPS
+SWAPTIME = 10 * FPS
 PLAYER_INIT_POSITION = [pg.Vector2(200, 400), pg.Vector2(600, 400)]
 PLAYER_RADIUS = 75
 SPEED_ATTACK = 100
